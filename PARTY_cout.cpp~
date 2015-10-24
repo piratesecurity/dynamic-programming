@@ -1,0 +1,57 @@
+#include <iostream>
+using namespace std;
+int global=0;
+
+void budget_plan(int *party_prices,int *party_funs,int num_parties,int budget)
+	{
+	int solutions[num_parties+1][budget+1],i,j;
+	int sol_weights[num_parties+1][budget+1];
+	for (i=0;i<=num_parties;i++) {solutions[i][0]=0; sol_weights[i][0]=0;}
+	for (i=0;i<=budget;i++) {solutions[0][i]=0; sol_weights[0][i]=0;}
+	for (i=1;i<=num_parties;i++)
+		{
+		for (j=1;j<=budget;j++)
+			{
+				if (party_prices[i-1]<=j)
+					{
+						int with_i,weight_with_i=party_prices[i-1]+sol_weights[i-1][j-party_prices[i-1]];
+						
+						with_i=party_funs[i-1]+solutions[i-1][j-party_prices[i-1]];
+						if ((with_i>solutions[i-1][j])|| ((with_i==solutions[i-1][j]) && weight_with_i<sol_weights[i-1][j]))
+							{
+								solutions[i][j]=with_i;
+								sol_weights[i][j]=weight_with_i;
+							}
+						else
+							{
+								solutions[i][j]=solutions[i-1][j];
+								sol_weights[i][j]=sol_weights[i-1][j];
+							}
+					}
+				else
+						{
+							solutions[i][j]=solutions[i-1][j];
+							sol_weights[i][j]=sol_weights[i-1][j];
+						}
+			}
+		}
+	if (global!=0) cout <<endl;
+	global++;
+	cout <<sol_weights[num_parties][budget]<<" "<< solutions[num_parties][budget];	
+	}
+
+
+
+int main()
+	{
+	int budget,num_parties,i;
+	cin>>budget>>num_parties;
+	while (budget!=0 && num_parties!=0)
+		{
+		int party_prices[num_parties],party_funs[num_parties];
+		for (i=0;i<num_parties;i++) cin>> party_prices[i] >> party_funs[i];				
+		budget_plan(party_prices,party_funs,num_parties,budget);	
+		cin >>budget>>num_parties;
+		}
+	return 0;
+	}

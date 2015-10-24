@@ -1,0 +1,166 @@
+<script type="text/javascript">
+function recordTime() {
+	var d = new Date();
+	var n = d.getTime();
+	return n;
+}
+	
+function getXmlHttpObject() {
+    var xmlhttpReq;
+    if (window.XMLHttpRequest){
+        // code for IE7+, Firefox, Chrome, Opera, Safari
+        xmlhttpReq=new XMLHttpRequest();
+    }
+    else{
+        // code for IE6, IE5
+        xmlhttpReq=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    return xmlhttpReq;
+}
+
+function ajaxCall(scriptToExecute, queryString, waitCallback, processCallback, successCallback, failureCallback, id) {
+    var xmlhttp = getXmlHttpObject();
+    id = typeof id !== 'undefined' ? id : 'undefined';
+
+    xmlhttp.onreadystatechange=function() {
+        if (xmlhttp.readyState==4 && xmlhttp.status == 200) {
+        	successCallback(xmlhttp.responseText, id);
+        }
+        else if(xmlhttp.readyState==3 && xmlhttp.status==200) {
+        	processCallback(id, xmlhttp.responseText);
+        }
+        else {
+        	waitCallback(id);
+        }
+    }   
+    xmlhttp.open("POST",scriptToExecute,true);
+    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+    xmlhttp.send(queryString);
+    xmlhttp.onerror = function(e) {
+    	xmlhttp.abort();
+        failureCallback();
+    };
+    return xmlhttp;
+}
+
+function validString(str){
+	if( /[^a-zA-Z0-9_]/.test( str ) ) {
+   		return false;
+	}
+	return true;     
+}
+
+function createObjectURL(blob){
+	if(window.webkitURL){
+		return window.webkitURL.createObjectURL(blob);
+	}
+	else if( window.URL && window.URL.createObjectURL ){
+		return window.URL.createObjectURL(blob);
+	}
+	else {
+		return null;
+	}
+}
+function downloadFile(fileName,text){
+	 if(text.length==0){
+		 alert("No content to download.");
+		 return true;
+	 }
+	 else{
+		
+		 var blob = new Blob([text],{type:'text/plain'});
+		 var blobURL = createObjectURL(blob);
+		 
+		 var pom = document.createElement('a');
+		 
+		 if(typeof pom.download != 'undefined'){
+			 pom.setAttribute('href',blobURL);
+			 pom.setAttribute('download',fileName);
+			
+			 
+			 var parent = document.getElementById("dummyLinks");
+			 parent.appendChild(pom);
+			 pom.click();
+			 
+			 parent.removeChild(pom);
+			 setTimeout(function() {
+				 window.URL.revokeObjectURL(blobURL);
+			 }, 1500);			 
+			 return true;		 
+		 }
+		 else{
+			 return false;
+		 }
+	 }
+}
+
+
+function getProblemsToContribute(scriptURL) {
+    var userID = document.getElementById("userId").value;
+    if(userID.length==0) {
+        alert("Please Enter your SPOJ Username");
+        return false;
+    }
+    if(!validString(userID)) {
+    	alert("Invalid User ID");
+    	return false;
+    }
+    document.getElementById("userId").disabled=true;
+    var queryString = "userId="+userID;
+    var waitCallback = function () {
+		document.getElementById("problemsToContribute").innerHTML= '<div align="center" class="alert alert-warning">Connecting to Server...</div>';
+	}
+	var processCallback = function () {
+		document.getElementById("problemsToContribute").innerHTML= '<div align="center" class="alert alert-info">Processing your Request...</div>';
+	}
+	var successCallback = function (responseText) {
+		document.getElementById("problemsToContribute").innerHTML= responseText;
+	}
+	var failureCallback = function () {
+	    var msg = 'There seems to be some Connectivity Issue with your Network.<br>Please try again!';	     
+	    document.getElementById("problemsToContribute").innerHTML= '<div align="center" class="alert alert-danger">'+msg+'</div>';
+	}  
+    ajaxCall(scriptURL, queryString, waitCallback, processCallback, successCallback, failureCallback);
+    return false;
+}
+
+function getProblemsMatchingThisPrefix(prefix, scriptURL) {
+    if(prefix.length == 0) {
+        document.getElementById("livesearch").innerHTML = "";
+        return;
+    }
+    if(!validString(prefix)) {
+    	alert("Invalid Characters provided.");
+    	return false;
+    }
+    var queryString = "q="+prefix;
+    var waitCallback = function () {
+		document.getElementById("livesearch").innerHTML= '<div align="center" class="alert alert-warning">Connecting to Server...</div>';
+	}
+	var processCallback = function () {
+		document.getElementById("livesearch").innerHTML= '<div align="center" class="alert alert-info">Searching...</div>';
+	}
+	var successCallback = function (responseText) {
+		document.getElementById("livesearch").innerHTML= responseText;
+	}
+	var failureCallback = function () {
+	    var msg = 'There seems to be some Connectivity Issue with your Network.<br>Please try again!';	     
+	    document.getElementById("livesearch").innerHTML= '<div align="center" class="alert alert-danger">'+msg+'</div>';
+	} 
+    ajaxCall(scriptURL, queryString, waitCallback, processCallback, successCallback, failureCallback);
+}
+
+
+</script>
+
+ <input type="text" class="form-control" style="width:90%;" placeholder="Enter the SPOJ Problem Code" onkeyup="getProblemsMatchingThisPrefix(this.value,'http://spojtoolkit.com/src/LiveSearch.php')"/>
+           
+
+<form onsubmit="getProblemsMatchingThisPrefix(this.value,'http://spojtoolkit.com/src/LiveSearch.php')">
+
+<input name='q' value='"'>
+
+<input type=submit value=submit >
+
+</form>

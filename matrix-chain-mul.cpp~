@@ -1,8 +1,7 @@
 /*
 Matrix chain multiplicaion solution using dynamic programming..
 Top Down approach
-Tabular method
-solutions[i][j] represents minimum scalar multiplications for multiplying i to j matrices
+
 */
 
 

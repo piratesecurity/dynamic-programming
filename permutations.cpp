@@ -1,0 +1,34 @@
+#include <iostream>
+#include <cstdio>
+
+int forumula(int n)
+	{
+	return n*(n-1)/2	
+	}
+
+int find_permutations(int n,int k)
+	{
+	int solutions[k+1],i;
+	for (i=0;i<=k;i++) solutions[i]=-1;
+	solutions[0]=1;
+	for (i=1;i<=k;i++)
+		{
+		int j=1;
+		while (formula(j)<=i)
+			{
+			
+			}
+		}	
+	
+	}
+
+
+
+int main()
+	{
+	int n,k,i,j;
+	scanf("%d",&n);
+	scanf("%d",&k);
+	printf("%d ",find_permutations(n,k));
+
+	}
